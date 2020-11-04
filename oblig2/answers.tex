@@ -1,0 +1,278 @@
+\documentclass[defaultpackages]{simplereport}
+\usepackage{float}
+\usepackage{listings}
+\usepackage[]{enumitem}
+\usepackage{bm}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata,positioning}
+\title{Oblig 2}
+\author{Åsmund Aqissiaq Arild Kløvstad}
+\course[INF210]{Modelling of Computing}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\powerset}[1]{\mathcal{P}(#1)}
+
+\lstset{
+  basicstyle=\itshape,
+  xleftmargin=3em,
+  literate={->}{$\rightarrow$}{2}
+           {l}{$\lambda$}{1}
+}
+
+\begin{document}
+\maketitle{}
+\section*{main.pdf 5.7}
+[coming soon]
+
+\section*{Textbook 3.3}
+  Exercise 3) and 4) use the procedure described by the text book in section 3.3
+  to mark pairs of states that cannot be collapsed, and then collapsing the
+  remaining pairs.
+\begin{itemize}[label=]
+\item \textbf{3)} with one step labelled "a" from s4 to s2\\\\
+  Step one marks $\{s_0, s_2\}, \{s_0, s_4\}, \{s_1, s_2\}, \{s_1, s_4\}, \{s_2,
+  s_3\}, \{s_3, s_4\}$.\\
+  Step two marks $\{s_0, s_1\}$ and $\{s_0, s_3\}$. The final two pairs are not
+  marked in step three and we collapse $\{s_1, s_3\}$ and $\{s_2, s_4\}$
+  resulting in the minimal automata in figure \ref{fig:3.3.3a}.
+  \begin{figure}[H]
+     \centering
+     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
+
+       \node[state, initial] (s_0)                {$s_0$};
+       \node[state]          (s_1) [right of=s_0] {$\{s_1, s_3\}$};
+       \node[state,accepting](s_2) [right of=s_1] {$\{s_2, s_4\}$};
+
+       \path[->]
+       (s_0) edge [] node {a, b} (s_1)
+       (s_1) edge [loop above] node {b} ()
+             edge node {a} (s_2)
+       (s_2) edge [loop above] node {a} ()
+             edge [loop below] node {b} ();
+     \end{tikzpicture}
+     \caption{Minimal automata with ``a''-step from $s_4$ to $s_2$}
+     \label{fig:3.3.3a}
+  \end{figure}
+\item \textbf{3)} as given\\\\
+  Same as above, but this time step two also marks $\{s_2, s_4\}$ and only
+  $\{s_1, s_3\}$ is collapsed resulting in figure \ref{fig:3.3.3b}
+  \begin{figure}[H]
+     \centering
+     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
+
+       \node[state, initial] (s_0)                {$s_0$};
+       \node[state]          (s_1) [right of=s_0] {$\{s_1, s_3\}$};
+       \node[state,accepting](s_2) [above right of=s_1] {$s_2$};
+       \node[state,accepting](s_3) [below right of=s_1] {$s_4$};
+
+       \path[->]
+       (s_0) edge [] node {a, b} (s_1)
+       (s_1) edge [loop above] node {b} ()
+             edge node {a} (s_2)
+             edge node {a} (s_3)
+       (s_2) edge [loop above] node {b} ()
+             edge [] node {a} (s_3)
+       (s_3) edge [loop below] node {b} ();
+     \end{tikzpicture}
+     \caption{Minimal automata as given}
+     \label{fig:3.3.3b}
+  \end{figure}
+\item \textbf{4)}\\\\
+  Step one marks $\{s_0, s_1\}, \{s_0, s_2\}, \{s_1, s_3\}, \{s_2, s_3\}$.\\
+  Step two marks $\{s_1, s_3\}$ and $\{s_0, s_3\}$ is collapsed.
+  \begin{figure}[H]
+     \centering
+     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
+
+       \node[state, initial] (s_0)                {$\{s_0, s_3\}$};
+       \node[state,accepting](s_1) [above right of=s_0] {$s_1$};
+       \node[state,accepting](s_2) [below right of=s_0] {$s_2$};
+
+       \path[->]
+       (s_0) edge [bend left] node {a} (s_1)
+             edge [bend left] node {b} (s_2)
+       (s_1) edge [loop above] node {a} ()
+             edge [bend left] node {b} (s_0)
+       (s_2) edge [loop below] node {b} ()
+             edge [bend left] node {a} (s_0);
+     \end{tikzpicture}
+     \label{fig:3.3.4}
+     \caption{Minimal automata 4)}
+  \end{figure}
+ \item \textbf{6)} Find minimal automaton for $a(b \mid c)^*bb^*$
+  \begin{figure}[H]
+     \centering
+     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
+
+       \node[state, initial] (s_0)                {$s_0$};
+       \node[state](s_1) [right of=s_0] {$s_1$};
+       \node[state,accepting](s_2) [right of=s_1] {$s_2$};
+
+       \path[->]
+       (s_0) edge [] node {a} (s_1)
+       (s_1) edge [loop above] node {b, c} ()
+             edge [] node {b} (s_2)
+       (s_2) edge [loop above] node {b} ();
+     \end{tikzpicture}
+     \caption{Minimal automaton for $a(b \mid c)^*bb^*$}
+  \end{figure}
+\end{itemize}
+\section*{Textbook 3.4}
+\begin{itemize}[label=]
+  \item \textbf{6)} Determine whether the language $\{\mathbf{ww} \mid
+    \mathbf{w} \in \Sigma^*, \lvert \Sigma \rvert = 2\}$ is regular.\\
+    \\
+    Assume regular. Then by pumping lemma there exists an $n > 0$ such that for
+    any word $\mathbf{xyz}$ in the language of length $n$ or greater,
+    $\mathbf{x}\mathbf{y}^k\mathbf{z}$ is also in the language for all $k$.\\
+    We consider $\mathbf{w} \in \Sigma^*$ such that $\lvert \mathbf{w} \rvert =
+    n$ and say $\mathbf{w} = \mathbf{uv}$ with distinct $\mathbf{u}, \mathbf{v}$
+    without loss of generality. Then $\mathbf{ww}$ is large enough for the pumping lemma and in the
+    language by construction. Now let $\mathbf{ww} = \mathbf{xyz}$ in order to
+    apply the pumping lemma. There are two ways this could split $\mathbf{ww}$: either $\mathbf{x} = \mathbf{w} =
+    \mathbf{yz}$ or $\mathbf{y} = \mathbf{vu}$, splitting $\mathbf{w}$.\\
+    In the first case $\mathbf{y}^k\mathbf{z} \neq \mathbf{w}$ for $k \neq 1$
+    and the pumping lemma does not hold. (More precisely they are not
+    \textit{necessarily} equal for an arbitrary $\mathbf{w}$).\\
+    In the second case $\mathbf{x}\mathbf{y}^k\mathbf{z} =
+    \mathbf{u}\mathbf{vu}^k\mathbf{v}$. For $k = 0$ we have $\mathbf{uv}$, which
+    is certainly not in the language (assuming distinct $\mathbf{u},
+    \mathbf{v}$) and so the pumping lemma does not hold.\\
+    We conclude that the language is not regular.
+  \item \textbf{7)} Determine whether the language $\{a^{2n} \mid n \geq 1\}$ is
+    regular.\\\\
+    We note that the language is described by the regular expression $(aa)^+$
+    and conclude it is regular.
+  \item \textbf{10)} Determine whether the language $\{\mathbf{ww}^R \mid
+    \mathbf{w} \in \{a, b\}^*, \lvert \mathbf{w} \rvert \leq 3\}$ is
+    regular.\\\\
+    The language is finite, and therefore regular. It is described by the
+    (exhaustive) regular expression ${aaaaaa} \mid {bbbbbb} \mid
+    {abaaba} \mid {baaaab} \mid {aabbaa} \mid {aaaa}
+    \mid {bbbb} \mid {abba} \mid {baab} \mid {aa} \mid {bb}$.
+\end{itemize}
+\section*{Textbook 3.5}
+\begin{itemize}[label=]
+  \item \textbf{1)} Prove there is an algorithm to decide if a regular language $L = \Sigma^*$\\\\
+    We construct a 3-step algorithm based on the observation that $\Sigma^*
+    \setminus \Sigma^* = \emptyset$
+    \begin{enumerate}
+    \item Construct a finite automaton $M_L$ accepting L
+    \item Swap final and non-final states of $M_L$ to obtain an automaton for the complement of $L = \Sigma^* \setminus L$.
+    \item For each final state in $M_{\Sigma^* \setminus L}$, check if reachable
+      from initial state. If yes, then $L \neq \Sigma^*$. If no final states
+      are reachable then $L = \Sigma^*$.
+    \end{enumerate}
+  \item \textbf{6)} Prove there is an algorithm for determining if there is a
+    word in a regular language that begins with a given letter.\\\\
+    Assume we have a finite automaton $M_L$ accepting $L$. Then for each state
+    $q_i$ reachable from $q_0$ by the given letter and each final state $f_i$:
+    if $f_i$ is reachable from $q_i$, return ``yes''. Then if we exhaust the
+    search, return ``no''. 
+  \item \textbf{7)} Prove there is an algorithm to determine if a regular
+    language contains a word of even length.\\\\
+    We construct a 2-step algorithm based on the observation that any even
+    number is a multiple of 2, and the assumption that we can find a path
+    between two nodes in a graph. We also assume a finite automaton $M_L$
+    accepting $L$:
+    \begin{enumerate}
+      \item construct a graph $G$ such that $V(G) = Q$ and $E(G) = \{(q_i, q_j)
+        \mid \text{there is a path of length 2 from} q_i \text{to} q_j \text{in}
+        M_L\}$
+       \item for each final state $f_i$, look for a path from $q_0$ to $f_i$. If
+         such a path exists return ``yes'', otherwise return ``no''. 
+      \end{enumerate}
+\end{itemize}
+\section*{Textbook 3.6}
+\begin{itemize}[label=]
+  \item \textbf{18)} Construct a pushdown automaton accepting $L =
+    \{\textbf{w}c\textbf{w}^r \mid \textbf{w} \in \{a, b\}^*\}$.\\\\
+    Use PDA model with empty stack-acceptance and stack alphabet $\{\alpha, \beta\}$.
+    \begin{figure}[H]
+     \centering
+     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
+
+       \node[state, initial] (s_0) {$q_0$};
+       \node[state, accepting](s_1) [right of=s_0] {$q_1$};
+
+       \path[->]
+       (s_0) edge [loop above] node {$a,\lambda;\alpha$} ()
+             edge [loop below] node {$b, \lambda; \beta$} ()
+             edge [] node {$c, \lambda ; \lambda$} (s_1)
+       (s_1) edge [loop above] node {$a,\alpha;\lambda$} ()
+             edge [loop below] node {$b, \beta; \lambda$} ();
+     \end{tikzpicture}
+     \caption{pushdown automaton accepting $L = \{\textbf{w}c\textbf{w}^r \mid \textbf{w} \in \{a, b\}^*\}$}
+     \end{figure}
+   \item \textbf{union, concat and kleene star go here}
+\end{itemize}
+\section*{Textbook 4.1}
+\begin{itemize}[label=]
+  \item \textbf{14)} Construct a grammar for the language $(ab)^* \mid (ac)^*$
+    \begin{lstlisting}
+      S -> abA | acB
+      A -> abA | l
+      B -> acB | l
+      \end{lstlisting}
+  \item \textbf{21)} Construct a grammar for the language $(a | b)^*(aa | bb)(a|b)^*$
+    \begin{lstlisting}
+      S -> aA | bA | B
+      A -> aA | bA | B
+      B -> aaC | bbC
+      C -> aC | bC | l
+      \end{lstlisting}
+   \item \textbf{24)} Find an automaton which accepts the language generated by
+     \lstinline{S -> aB}, \lstinline{A -> aB}, \lstinline{B -> bA | b}\\\\
+    We construct an automaton with states $N \cup \{f\}$ and initial state $S$
+    following the procedure:
+    \begin{itemize}[label=$\cdot$]
+    \item \lstinline{A -> aB} becomes the rule $(A, a, B)$
+    \item \lstinline{A -> a} becomes the rule $(A, a, f)$
+      \item \lstinline{A -> l} makes $A$ final
+      \end{itemize}
+    \begin{figure}[H]
+     \centering
+     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
+
+       \node[state, initial] (S) {S};
+       \node[state] (B) [right of=S] {B};
+       \node[state] (A) [right of=B] {A};
+       \node[state, accepting] (f) [below of=B] {f};
+
+       \path[->]
+       (S) edge [] node {a} (B)
+       (B) edge [bend left] node {b} (A)
+       edge [] node {b} (f)
+       (A) edge [bend left] node {a} (B);
+     \end{tikzpicture}
+     \caption{The finite automaton for \textbf{24)}}
+     \end{figure}
+   \item \textbf{36)} Construct a grammar that generates the language accepted
+     by a given finite automaton.\\\\
+     We apply the procedure from the previous question in reverse.
+     \begin{itemize}[label=$\cdot$]
+      \item the rule $(Q, a, Q')$ becomes \lstinline{Q -> aQ'}
+      \item if $Q' \in F$, add \lstinline{Q -> a} to our grammar rules
+      \item if $Q \in F$, add \lstinline{Q -> l} to our rules
+      \end{itemize}
+      Also note that the state $S_4$ is a dead end, and will not contribute to
+      the accepted language. The resulting grammar has $N = \{S_0, S_1, S_2,
+      S_3\}$, $\Sigma = \{a, b\}$ and production rules:
+      \begin{itemize}[label=]
+      \item $S_0 \rightarrow aS_1 \mid bS_2$
+        \item $S_1 \rightarrow bS_1 \mid aS_3 \mid a$
+        \item $S_2 \rightarrow aS_1 \mid bS_3 \mid b$
+          \item $S_3 \rightarrow \lambda$
+        \end{itemize}
+  \end{itemize}
+\end{document}
