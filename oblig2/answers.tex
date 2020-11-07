@@ -26,7 +26,76 @@
 \begin{document}
 \maketitle{}
 \section*{main.pdf 5.7}
-[coming soon]
+\paragraph{\textbf{4)}} This exercise is about the language of balanced
+parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
+  least as many ['s as ]'s, and the total number of ['s equal the number of ]'s}\}\]
+\begin{itemize}[label=]
+  \item \textbf{a)} List all words in $D$ of length 6.\\ There are 5:
+    $[ [ [ ] ] ], [ ] [ [ ] ], [ [ ] ] [ ], [ [ ] [ ] ] \text{ and } [ ] [ ] [
+    ]$.
+    
+  \item \textbf{b)} Show that the language of all words of $D$ with length at
+    most $n$ is regular for any fixed $n$.\\
+    All finite languages are regular. This language is finite and therefore
+    regular.
+    
+  \item \textbf{c)} Is the Dyck language of depth at most 3 regular? (Depth is
+    the maximal number of nested parentheses)\\
+    This restricted language is recognized by the following finite automaton:
+  \begin{figure}[H]
+     \centering
+     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
+       \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
+
+       \node[state, initial, accepting] (s_0)                {$s_0$};
+       \node[state]          (s_1) [right of=s_0] {$s_1$};
+       \node[state]          (s_2) [right of=s_1] {$s_2$};
+       \node[state]          (s_3) [right of=s_2] {$s_3$};
+
+       \path[->]
+       (s_0) edge [bend left] node {[} (s_1)
+       (s_1) edge [bend left] node {[} (s_2)
+             edge [bend left] node {]} (s_0)
+       (s_2) edge [bend left] node {[} (s_3)
+             edge [bend left] node {]} (s_1)
+       (s_3) edge [bend left] node {[} (s_2);
+     \end{tikzpicture}
+  \end{figure}
+  Since it is recognized by a finite automaton, it is regular.
+  
+\item \textbf{d)} Is the Dyck language of depth at most $n$ for any fixed $n$
+  regular?\\
+  We can construct a finite automaton like the one above for any fixed $n$ with
+  $n+1$ states. By the same argument as before, this language is also regular.
+
+\item \textbf{e)} Is the Dyck language regular?\\
+  No. The language consisting of simply nested parentheses $\{[^n]^n \mid n \in \N\}$ is contained in
+  the Dyck language. This is isomorphic to $\{a^nb^n \mid n \in \N\}$ which is
+  known to be non-regular so the Dyck language is also non-regular.
+
+\item \textbf{f)} An inductive definition of the Dyck language is given by:
+  \[\lambda \in D'\]
+  \[\mathbf{u}, \mathbf{v} \in D' \implies \mathbf{uv} \in D'\]
+  \[\mathbf{w} \in D' \implies [\mathbf{w}] \in D'\]
+  Show that these two definitions are equal.\\\\
+
+  We will show the equality in two steps. First $D' \subseteq D$ by induction on
+  the length of words $k$. As a base step for $k=0$, $\lambda \in D$ and also in
+  $D'$ by definition. We form the induction hypothesis $\lvert \mathbf{w} \rvert
+  \leq k,  \mathbf{w} \in D' \implies \mathbf{w} \in D$. Now we assume it holds for $k-1$ and
+  show it also holds for $k$.\\
+  Consider $\mathbf{w} \in D'$ of length $k$. Since it is in $D'$, either
+  $\mathbf{w} = [\mathbf{w'}]$ or $\mathbf{w} = \mathbf{uv}$ for some
+  $\mathbf{u,v, w'} \in D'$. In the first case $\lvert \mathbf{w'} \rvert \leq
+  k$, so $\mathbf{w'}$ is in $D$ by the induction hypothesis and so $\mathbf{w}$
+  is as well. In the second case $\lvert \mathbf{u} \rvert, \lvert \mathbf{v}
+  \rvert < k$ (since we have used the rule to construct $\mathbf{w}$ from
+  smaller parts) and hence in $D$ by the induction hypothesis. Since both are in
+  $D$, they have an equal number of opening and closing parentheses, and so does
+  $\mathbf{w}$ so it is in $D$.\\\\
+
+  Secondly we show $D \subseteq D'$.
+\end{itemize}
 
 \section*{Textbook 3.3}
   Exercise 3) and 4) use the procedure described by the text book in section 3.3
@@ -171,12 +240,18 @@
       from initial state. If yes, then $L \neq \Sigma^*$. If no final states
       are reachable then $L = \Sigma^*$.
     \end{enumerate}
+   This algorithm will terminate since $M_L$ is finite and hence $M_{\Sigma^*
+     \setminus L}$ is finite. It produces the correct answer because $\Sigma^*
+   \setminus L = \emptyset$ if and only if $L = \Sigma^*$
   \item \textbf{6)} Prove there is an algorithm for determining if there is a
     word in a regular language that begins with a given letter.\\\\
     Assume we have a finite automaton $M_L$ accepting $L$. Then for each state
     $q_i$ reachable from $q_0$ by the given letter and each final state $f_i$:
     if $f_i$ is reachable from $q_i$, return ``yes''. Then if we exhaust the
-    search, return ``no''. 
+    search, return ``no''.\\
+    This algorithm will terminate since $M_L$ is final. It gives the correct
+    answer because any accepting path for a word starting with the given letter
+    must start with that letter and end in a final state.
   \item \textbf{7)} Prove there is an algorithm to determine if a regular
     language contains a word of even length.\\\\
     We construct a 2-step algorithm based on the observation that any even
@@ -190,6 +265,9 @@
        \item for each final state $f_i$, look for a path from $q_0$ to $f_i$. If
          such a path exists return ``yes'', otherwise return ``no''. 
       \end{enumerate}
+   This algorithm gives the right answer because if a path exists between $q_i$
+   and $q_j$ in $G$, then it also exists in $M_L$ and a path of length $n$
+   exists in $G$ if and only if a path of length $2n$ exists in $M_L$
 \end{itemize}
 \section*{Textbook 3.6}
 \begin{itemize}[label=]
