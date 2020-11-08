@@ -19,6 +19,7 @@
 \lstset{
   basicstyle=\itshape,
   xleftmargin=3em,
+  mathescape,
   literate={->}{$\rightarrow$}{2}
            {l}{$\lambda$}{1}
 }
@@ -36,7 +37,8 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
     
   \item \textbf{b)} Show that the language of all words of $D$ with length at
     most $n$ is regular for any fixed $n$.\\
-    All finite languages are regular. This language is finite and therefore
+    All finite languages are regular since they can be constructed by a finite
+    number of concatenations and unions of singleton languages. This language is finite and therefore
     regular.
     
   \item \textbf{c)} Is the Dyck language of depth at most 3 regular? (Depth is
@@ -290,8 +292,47 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
              edge [loop below] node {$b, \beta; \lambda$} ();
      \end{tikzpicture}
      \caption{pushdown automaton accepting $L = \{\textbf{w}c\textbf{w}^r \mid \textbf{w} \in \{a, b\}^*\}$}
-     \end{figure}
-   \item \textbf{union, concat and kleene star go here}
+   \end{figure}
+   
+   \item Show that the class of languages accepted by PDA's is closed under
+     union, concatenation and and the Kleene star.\\\\
+     We will show this by construction of new PDA's. Assume the PDA $M_L =
+     \langle \Sigma, \Gamma, Q, q_0, \Delta, F \rangle$ accepts the language $L$
+     and $M_{L'} = \langle \Sigma', \Gamma', Q', q'_0, \Delta', F' \rangle$
+     accepts $L'$.\\
+
+     First we construct a PDA which accepts $L \cup L'$. $M_{L \cup L'} =
+     \langle \Sigma \cup \Sigma', \Gamma \cup \Gamma', Q \uplus Q' \cup \{q''_0\},
+     q''_0, \Delta'', F \cup F' \cup \{q''_0\} \text{ if $q_0$ or $q'_0$ is final}
+     \rangle$ where $\Delta'' = \Delta \cup \Delta' \cup \{(q''_0, a, \alpha ;
+     \beta, q_i) \mid (q_0, a, \alpha ; \beta, q_i) \in Q \lor (q'_0, a, \alpha
+     ; \beta, q_i) \in Q'\}$.
+     That is a PDA whose alphabet and stack alphabet are simply the union of the
+     original PDAs'. In the set of states take a disjoint union and add a new
+     initial state $q''_0$. This is also in $F''$ if either original initial state was final.
+     Finally we add rules to go from the new initial state to all states
+     reachable from original initial states. This is straight-forwardly analogous to the
+     construction of $M_{L \cup L'}$ for finite automata.\\
+     This new PDA accepts all the words in $L$ because paths through $M_L$ are
+     also in $M_{L \cup L'}$. It accepts the words in $L'$ by the same argument.
+     It does not accept any other words because any path from $q''_0$ to a final
+     state is also a path from either $q_0$ or $q'_0$ to a final state, with the
+     first swapped for one of the new added steps and hence must be in $L$ or
+     $L'$.\\
+
+     To construct a PDA which accepts $L \cdot L'$ we ``append'' one PDA
+     to the other by adding rules $\{(q_i, a, \alpha ; \beta, q'_0) \mid (q_i,
+     a, \alpha, \beta, q_j) \in \Delta \land q_j \in F\}$ and letting $F'$ be
+     the final states. Additionally, if $q'_0$ is final, each $q_i$ should also
+     be made final. Again, this is analogous to the construction of finite
+     automata for concatenation of regular languages.\\
+
+     Finally, the Kleene star of a language $L^*$ is accepted by ``looping''
+     $M_L$. To do this we add a new initial and final state $q'_0$ and an ``empty'' rule
+     $(q'_0, \lambda, \lambda ; \lambda, q_0)$, allowing our new machine to
+     accept the empty word (zero loops). Then add rules $(q_i, a, \alpha; \beta,
+     q_0)$ for each rule $(q_i, a, \alpha; \beta, q_j)$ in $M_L$ where $q_j$ is final.
+     
 \end{itemize}
 \section*{Textbook 4.1}
 \begin{itemize}[label=]
@@ -352,5 +393,52 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
         \item $S_2 \rightarrow aS_1 \mid bS_3 \mid b$
           \item $S_3 \rightarrow \lambda$
         \end{itemize}
+  \end{itemize}
+
+  \section*{Textbook 4.2}
+  \textbf{4)} and \textbf{5)} concern the grammar $G$ with $N = \{A, B, S\}$,
+  $\Sigma = {a, b}$, $R:$
+    \begin{lstlisting}
+      S -> ABABABA
+      A -> Aa | l
+      B -> b
+      \end{lstlisting}
+  \begin{itemize}[label=]
+  \item \textbf{4)} convert the grammar to Chomsky Normal Form (CNF).\\
+    We proceed in 3 steps:
+    \begin{enumerate}
+      \item Remove \lstinline{A -> Aa} by constructing the new non-terminal
+        $N_a$ and rules \lstinline{$N_a$ -> a, A -> A$N_a$}
+      \item Eliminate rules with more than two non-terminals on the right. We
+        replace \lstinline{S -> ABABABA} with
+        \begin{lstlisting}
+S -> A$S_1$
+$S_1$ -> B$S_2$
+$S_2$ -> A$S_3$
+$S_3$ -> B$S_4$
+$S_4$ -> A$S_5$
+$S_5$ -> BA
+        \end{lstlisting}
+      \item Get rid of the null production \lstinline{A -> l}
+      \end{enumerate}
+      The resulting grammar $G' = \langle \Sigma, N \cup \{N_a, S_{1}, ... ,
+      S_5\}, S, R' \rangle$ with $R' = $
+      \begin{lstlisting}
+A -> A$N_a$
+$N_a$ -> a
+B -> b
+S -> A$S_1$
+$S_1$ -> B$S_2$
+$S_2$ -> A$S_3$
+$S_3$ -> B$S_4$
+$S_4$ -> A$S_5$
+$S_5$ -> BA
+\end{lstlisting}
+
+    \item \textbf{5)} convert the grammar to Greibach normal form\\
+      Starting with the grammar $G'$ already in CNF we proceed in two steps:
+      \begin{enumerate}
+        \item Remove the left recursive rule \lstinline{A -> A$N_a$}
+      \end{enumerate}
   \end{itemize}
 \end{document}
