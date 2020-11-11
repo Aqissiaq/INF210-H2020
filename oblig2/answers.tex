@@ -15,6 +15,7 @@
 \newcommand{\Q}{\mathbb{Q}}
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\powerset}[1]{\mathcal{P}(#1)}
+\newcommand{\gen}{\rightarrow^*}
 
 \lstset{
   basicstyle=\itshape,
@@ -96,7 +97,31 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
   $D$, they have an equal number of opening and closing parentheses, and so does
   $\mathbf{w}$ so it is in $D$.\\\\
 
-  Secondly we show $D \subseteq D'$.
+  Secondly we show $D \subseteq D'$. First note that we can determine if a word
+  is in $D$ by maintaining a counter as we read from left to right. Start the
+  counter at 0, increase by one for each $[$ and decrease by one for each $]$.
+  If this counter always remains non-negative and is 0 at the end of the word,
+  then the word is in the Dyck language.
+  \\
+  First we look at a word $\mathbf{w}$ in $D$ such that the counter always
+  monotonically increases, then monotonically decreases to 0. (This corresponds to
+  simply nested parentheses.)
+  Looking at the sequence of counter values we can reconstruct the word by
+  concatenating a $[$ whenever it increases, and a $]$ whenever it decreases.
+  For a  sequence that increases $n$ times and then decreases $n$ times, this
+  construction is like taking $[\mathbf{w}]$ $n$ times and so the word is in
+  $D'$ as well.\\
+
+  Now we let the counter decrease to 0. If it ever reaches 0 after $i$ steps,
+  then we know $\mathbf{u} = w_0...w_i \in D$ and by the preceding argument also in $D'$.
+  Since the whole word is in $D$ it must again decrease to 0 and so $\mathbf{u}
+  = w_{i+1}...w_n$ is also in $D'$ and by construction $\mathbf{w} =
+  \mathbf{uv}$ is in $D'$ as well.\\
+
+  This argument is not entirely complete since we could have words like $[[][]]$
+  in which the counter is neither going straight up and down, nor reaching 0 in
+  the middle. However we note that $[][]$ is covered by the second possibility
+  and we can therefore surround it by parentheses and still have a word in $D'$.
 \end{itemize}
 
 \section*{Textbook 3.3}
@@ -205,18 +230,15 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
     any word $\mathbf{xyz}$ in the language of length $n$ or greater,
     $\mathbf{x}\mathbf{y}^k\mathbf{z}$ is also in the language for all $k$.\\
     We consider $\mathbf{w} \in \Sigma^*$ such that $\lvert \mathbf{w} \rvert =
-    n$ and say $\mathbf{w} = \mathbf{uv}$ with distinct $\mathbf{u}, \mathbf{v}$
-    without loss of generality. Then $\mathbf{ww}$ is large enough for the pumping lemma and in the
+    n$. Also assume $\mathbf{w}$ is not all the same letter (we can do this
+    since $\lvert \Sigma \rvert > 1$). Then $\mathbf{ww}$ is large enough for the pumping lemma and in the
     language by construction. Now let $\mathbf{ww} = \mathbf{xyz}$ in order to
-    apply the pumping lemma. There are two ways this could split $\mathbf{ww}$: either $\mathbf{x} = \mathbf{w} =
-    \mathbf{yz}$ or $\mathbf{y} = \mathbf{vu}$, splitting $\mathbf{w}$.\\
-    In the first case $\mathbf{y}^k\mathbf{z} \neq \mathbf{w}$ for $k \neq 1$
+    apply the pumping lemma.\\
+    The pumping must occur within the first $n$ letters, so $\mathbf{xy}$ is a
+    subword of $\mathbf{w}$ and $\mathbf{ww} = \mathbf{xyvw}$ for some $\mathbf{v}$.
+    Then $\mathbf{xy}^k\mathbf{v} \neq \mathbf{w}$ for $k \neq 1$
     and the pumping lemma does not hold. (More precisely they are not
     \textit{necessarily} equal for an arbitrary $\mathbf{w}$).\\
-    In the second case $\mathbf{x}\mathbf{y}^k\mathbf{z} =
-    \mathbf{u}\mathbf{vu}^k\mathbf{v}$. For $k = 0$ we have $\mathbf{uv}$, which
-    is certainly not in the language (assuming distinct $\mathbf{u},
-    \mathbf{v}$) and so the pumping lemma does not hold.\\
     We conclude that the language is not regular.
   \item \textbf{7)} Determine whether the language $\{a^{2n} \mid n \geq 1\}$ is
     regular.\\\\
@@ -438,7 +460,62 @@ $S_5$ -> BA
     \item \textbf{5)} convert the grammar to Greibach normal form\\
       Starting with the grammar $G'$ already in CNF we proceed in two steps:
       \begin{enumerate}
-        \item Remove the left recursive rule \lstinline{A -> A$N_a$}
-      \end{enumerate}
-  \end{itemize}
+        \item Remove the left recursive rule \lstinline{A -> A$N_a$} by
+          replacing it with \lstinline{A -> A', A' -> aA'}
+        \item Get rid of non-terminals on the let of productions by replacing
+          them with the terminals they generate.
+        \end{enumerate}
+     We obtain a new grammar with $N'' = \{N \cup \{A', S_1 ... S_6\}\}$ and
+     $R'' =$
+     \begin{lstlisting}
+$S$ -> aA'$S_1$
+$S_1$ -> b$S_2$
+$S_2$ -> aA'$S_3$
+$S_3$ -> b$S_4$
+$S_4$ -> aA'$S_5$
+$S_5$ -> b$S_6$
+$S_6$ -> a | aA'
+$A$ -> aA' | l
+\end{lstlisting}
+
+   \item \textbf{8)} Convert the following grammar to CNF:
+     \begin{lstlisting}
+S -> AbaB
+A -> bAa | l
+B -> AAb | aabA
+\end{lstlisting}
+     Following the same procedure as exercise \textbf{4)} we obtain:
+     \begin{lstlisting}
+$S$ -> A$S_1$
+$S_1$ -> $N_b S_2$
+$S_2$ -> $N_a$B
+$A$ -> $N_b A_1$
+$A_1$ -> A$N_a$
+$B$ -> A$B_1$ | $N_a B_2$
+$B_1$ -> A$N_b$
+$B_2$ -> $N_a B_3$
+$B_3$ -> $N_b$A
+$N_a$ -> a
+$N_b$ -> b
+\end{lstlisting}
+
+   \item \textbf{9)} convert the preceding grammar to GNF
+     This time there are no left-recursive rules to eliminate, so the only
+     necessary step is replacing leading non-terminals with the terminals they
+     generate. We note $A \gen bA, \; A_1 \gen bN_a, \;B \gen bB_1 | aB_2,\; B_1 \gen
+     bAN_b, \;B_2 \gen aB_3,\; N_a \gen a, \; N_b \gen b$ and construct the production rules:
+     \begin{lstlisting}
+$S$ -> bA$S_1$
+$S_1$ -> b$S_2$
+$S_2$ -> aB
+$A$ -> b$A_1$
+$A_1$ -> b$A_1 N_a$
+$B$ -> b$A_1 B_1$ | a$B_2$
+$B_1$ -> b$A_1 N_b$
+$B_2$ -> a$B_3$
+$B_3$ -> bA
+$N_a$ -> a
+$N_b$ -> b
+\end{lstlisting}
+   \end{itemize}
 \end{document}

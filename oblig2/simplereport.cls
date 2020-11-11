@@ -52,6 +52,7 @@
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[english]{babel}
 \RequirePackage{graphicx}
+\RequirePackage{amssymb}
 \RequirePackage{mathtools}
 \RequirePackage{booktabs} % for much better looking tables
 \RequirePackage{array} % for better arrays (eg matrices) in maths
