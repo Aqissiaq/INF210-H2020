@@ -124,6 +124,65 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
   and we can therefore surround it by parentheses and still have a word in $D'$.
 \end{itemize}
 
+\paragraph{\textbf{5)}} In this exercise we are asked to show that two PDA models
+  are equivalent by showing each model \textit{emulates} the other. $M = (\Sigma,
+  \Gamma, Q, q_0, \Delta, F)$ is as defined in the textbook and $M' = (\Sigma',
+  \Gamma', !, Q', q_0' \Delta')$ is a PDA with empty-stack acceptance and the
+  designated start-of-stack symbol $!$.
+  \\\\
+  First we construct an $M'$ emulating $M$. Since the PDAs should recognize the
+  same language $\Sigma' = \Sigma$. We want to store the execution of
+  $M$ on the stack of $M'$ so $\Gamma' = \{s \gamma t \mid s,t \in Q, \gamma \in
+  \Gamma\} \cup \{!\}$. Our construction will have two states $Q' = \{q_0', q_1'\}$
+  where $q_0'$ is the starting state and $q_1'$ will serve as a faux final
+  state. We define $\Delta$ in three steps:
+  \begin{enumerate}
+  \item First the pushing rules $(q_0', a, s \alpha r; t \beta r, q_0')$ for each $(s, a,
+  \alpha ; \beta, t) \in \Delta, a \in \Sigma \cup \{\lambda\}$ and $r \in Q$.
+  These rules emulate all the rules in $M$ that push something on the stack and
+  store the current state on stack. $r$ serves as a fallback state. Note that
+  $\alpha$ and $\beta$ may be the empty word.
+  \item Second the popping rules $(q_0', a, s \gamma t; \lambda, q_0')$ for $(s, a,
+  \gamma; \lambda, t) \in \Delta$. These rules emulate popping the symbol
+  $\gamma$ from the stack and moving to a new state. Because of the fallback
+  states added by the pushing rules and the non-determinism of our model we
+  avoid getting stuck.
+  \item Finally we add the rules $(q_0', a, s \gamma f; \lambda, q_1')$ for each $f
+  \in F$ to move into our ``accepting'' state and the single rule $(q_1',
+  \lambda, !; \lambda, q_1)$ to pop the bottom-of-stack symbol. Since execution
+  is non-deterministic we will move to this ``accepting'' state with only $!$ on
+  the stack when $M$ would move to a final state with an empty stack. Then we
+  pop the bottom-of-stack marker and accept.
+  \end{enumerate}
+  Finally we construct an $M$ emulating a given $M'$. From lectures (CFL.pdf
+  slide 13) we know that such an $M'$ can be reduced to a single state, so we
+  may assume without loss of generality that $M'$ is such a reduced PDA. Rules
+  in $\Delta'$ are given as triples omitting the state.
+  \\\\
+  Again we want to decide the same languages so $\Sigma = \Sigma'$. This time we
+  need not store any extra information in the stack so $\Gamma = \Gamma'$ as
+  well. Instead we need extra states to emulate pushing words, so $Q = \Gamma'
+  \cup \{q_0\} \cup \{f\}$ where $q_0$ is the starting state and $f$ is a final
+  state. To avoid confusion $q_\gamma$ denotes the state associated with the
+  stack symbol $\gamma$.
+
+  To emulate a rule $(l, \gamma'; \bm{\omega}) \in \Delta'$ with
+  $\bm{\omega} = \omega_1...\omega_n$ we add the rule $(q_0, l, \gamma';
+  \lambda, q_{\omega_1})$ to reach a ``pushing state'' and then $(q_{\omega_i},
+  \lambda, \lambda; \omega_{i+1}, q_{\omega_{i+1}})$ for each symbol $\omega_i$.
+  Finally the rule $(q_{\omega_n}, \lambda, \lambda; \lambda, q_0)$ moves us
+  back to where we started. This set of rules emulates pushing a word by moving
+  through a series of ``pushing'' states corresponding to the symbols of the
+  word and pushing them one by one.\\
+  If $\bm{\omega} = \lambda$ we have $(q_0, l, \gamma'; \lambda, q_0)$ instead.
+  
+  To emulate accepting with an empty stack we add the rules $(q_0, l, \lambda; \lambda, f)$ for each $(l, !;
+  \lambda) \in \Delta'$. This moves us to a final state if $M'$ would pop the
+  bottom-of-stack symbol. We also add $(q_0, l, \gamma; \lambda, f)$ for each
+  $(l, \gamma; \lambda)$ in $\Delta'$ in case $M'$ is not well behaved and
+  replaces $!$. Since execution is non-deterministic and the only place to go
+  from $f$ is to pop symbols and stay in $f$ we will end up in $f$ with an empty
+  stack only if $M'$ would have an empty stack.
 \section*{Textbook 3.3}
   Exercise 3) and 4) use the procedure described by the text book in section 3.3
   to mark pairs of states that cannot be collapsed, and then collapsing the
@@ -155,53 +214,37 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
      \label{fig:3.3.3a}
   \end{figure}
 \item \textbf{3)} as given\\\\
-  Same as above, but this time step two also marks $\{s_2, s_4\}$ and only
-  $\{s_1, s_3\}$ is collapsed resulting in figure \ref{fig:3.3.3b}
+  This time all pairs are marked and no states can be collapsed.
   \begin{figure}[H]
      \centering
      \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
        \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
 
        \node[state, initial] (s_0)                {$s_0$};
-       \node[state]          (s_1) [right of=s_0] {$\{s_1, s_3\}$};
-       \node[state,accepting](s_2) [above right of=s_1] {$s_2$};
-       \node[state,accepting](s_3) [below right of=s_1] {$s_4$};
+       \node[state]          (s_1) [above right of=s_0, xshift=1cm] {$s_1$};
+       \node[state]          (s_4) [below right of=s_0, xshift=1cm] {$s_3$};
+       \node[state,accepting](s_2) [right of=s_1] {$s_2$};
+       \node[state,accepting](s_3) [right of=s_4] {$s_4$};
 
        \path[->]
-       (s_0) edge [] node {a, b} (s_1)
-       (s_1) edge [loop above] node {b} ()
+       (s_0) edge [] node {a} (s_1)
+             edge [] node {b} (s_4)
+       (s_1) edge [bend right] node {b} (s_4)
              edge node {a} (s_2)
-             edge node {a} (s_3)
        (s_2) edge [loop above] node {b} ()
              edge [] node {a} (s_3)
-       (s_3) edge [loop below] node {b} ();
+       (s_3) edge [loop below] node {b} ()
+       (s_4) edge [bend right] node {b} (s_1)
+             edge [] node {a} (s_3);
      \end{tikzpicture}
      \caption{Minimal automata as given}
      \label{fig:3.3.3b}
   \end{figure}
-\item \textbf{4)}\\\\
+ \item \textbf{4)}\\\\
   Step one marks $\{s_0, s_1\}, \{s_0, s_2\}, \{s_1, s_3\}, \{s_2, s_3\}$.\\
-  Step two marks $\{s_1, s_3\}$ and $\{s_0, s_3\}$ is collapsed.
-  \begin{figure}[H]
-     \centering
-     \begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto]
-       \tikzstyle{every state}=[fill={rgb:black, 1;white,10}]
+  Step two marks $\{s_1, s_3\}$ and $\{s_0, s_3\}$, so no pair of states can be
+  collapsed. The FSM is minimal as given.
 
-       \node[state, initial] (s_0)                {$\{s_0, s_3\}$};
-       \node[state,accepting](s_1) [above right of=s_0] {$s_1$};
-       \node[state,accepting](s_2) [below right of=s_0] {$s_2$};
-
-       \path[->]
-       (s_0) edge [bend left] node {a} (s_1)
-             edge [bend left] node {b} (s_2)
-       (s_1) edge [loop above] node {a} ()
-             edge [bend left] node {b} (s_0)
-       (s_2) edge [loop below] node {b} ()
-             edge [bend left] node {a} (s_0);
-     \end{tikzpicture}
-     \label{fig:3.3.4}
-     \caption{Minimal automata 4)}
-  \end{figure}
  \item \textbf{6)} Find minimal automaton for $a(b \mid c)^*bb^*$
   \begin{figure}[H]
      \centering
@@ -214,12 +257,16 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
 
        \path[->]
        (s_0) edge [] node {a} (s_1)
-       (s_1) edge [loop above] node {b, c} ()
-             edge [] node {b} (s_2)
-       (s_2) edge [loop above] node {b} ();
+       (s_1) edge [loop above] node {c} ()
+             edge [bend left] node {b} (s_2)
+       (s_2) edge [loop above] node {b} ()
+             edge [bend left] node {c} (s_1);
      \end{tikzpicture}
      \caption{Minimal automaton for $a(b \mid c)^*bb^*$}
   \end{figure}
+  To show this FSM is minimal we perform the same procedure as in 3) and 4).\\
+  Step 1 marks $\{s_0, s_2\}$ and $\{s_1, s_2\}$, and $\{s_0, s_1\}$ cannot be
+  collapsed since $\Upsilon(s_1, a)$ is not defined.
 \end{itemize}
 \section*{Textbook 3.4}
 \begin{itemize}[label=]
@@ -229,16 +276,16 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
     Assume regular. Then by pumping lemma there exists an $n > 0$ such that for
     any word $\mathbf{xyz}$ in the language of length $n$ or greater,
     $\mathbf{x}\mathbf{y}^k\mathbf{z}$ is also in the language for all $k$.\\
-    We consider $\mathbf{w} \in \Sigma^*$ such that $\lvert \mathbf{w} \rvert =
-    n$. Also assume $\mathbf{w}$ is not all the same letter (we can do this
-    since $\lvert \Sigma \rvert > 1$). Then $\mathbf{ww}$ is large enough for the pumping lemma and in the
-    language by construction. Now let $\mathbf{ww} = \mathbf{xyz}$ in order to
-    apply the pumping lemma.\\
+    Let $\mathbf{w} = 0^n1^n$ (with $\Sigma = \{0,1\}$, but isomorphic to any
+    other such word over two letters). Now $\mathbf{ww}$ is certainly long
+    enough for the pumping lemma and in the language by construction.
+    Now let $\mathbf{ww} = \mathbf{xyz}$ in order to apply the pumping lemma.\\
     The pumping must occur within the first $n$ letters, so $\mathbf{xy}$ is a
     subword of $\mathbf{w}$ and $\mathbf{ww} = \mathbf{xyvw}$ for some $\mathbf{v}$.
-    Then $\mathbf{xy}^k\mathbf{v} \neq \mathbf{w}$ for $k \neq 1$
-    and the pumping lemma does not hold. (More precisely they are not
-    \textit{necessarily} equal for an arbitrary $\mathbf{w}$).\\
+    Then $\mathbf{xy}^0\mathbf{v}$ is either $a^{n-\lvert \mathbf{y} \rvert}b^n,
+    a^nb^{n-\lvert \mathbf{y} \rvert}$ or $a^jb^k$ for some $j, k \neq n$.
+    Either way $\mathbf{xy}^0\mathbf{v} \neq \mathbf{w}$ and $\mathbf{xy^0vw}$
+    is not in the language and the pumping lemma does not hold.\\
     We conclude that the language is not regular.
   \item \textbf{7)} Determine whether the language $\{a^{2n} \mid n \geq 1\}$ is
     regular.\\\\
@@ -249,8 +296,8 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
     regular.\\\\
     The language is finite, and therefore regular. It is described by the
     (exhaustive) regular expression ${aaaaaa} \mid {bbbbbb} \mid
-    {abaaba} \mid {baaaab} \mid {aabbaa} \mid {aaaa}
-    \mid {bbbb} \mid {abba} \mid {baab} \mid {aa} \mid {bb}$.
+    {abaaba} \mid {baaaab} \mid {aabbaa} \mid {abbbba} \mid {aaaa}
+    \mid {bbbb} \mid {abba} \mid {baab} \mid {aa} \mid {bb} \mid \lambda$.
 \end{itemize}
 \section*{Textbook 3.5}
 \begin{itemize}[label=]
@@ -286,12 +333,16 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
       \item construct a graph $G$ such that $V(G) = Q$ and $E(G) = \{(q_i, q_j)
         \mid \text{there is a path of length 2 from} q_i \text{to} q_j \text{in}
         M_L\}$
-       \item for each final state $f_i$, look for a path from $q_0$ to $f_i$. If
-         such a path exists return ``yes'', otherwise return ``no''. 
+       \item for each final state $f_i$, check if it can be reached from $q_0$
+         in G. 
       \end{enumerate}
-   This algorithm gives the right answer because if a path exists between $q_i$
-   and $q_j$ in $G$, then it also exists in $M_L$ and a path of length $n$
-   exists in $G$ if and only if a path of length $2n$ exists in $M_L$
+   This algorithm gives the right answer because a final state can be reached
+   from the start state in G iff a word of even length is accepted by $M_L$. To
+   determine whether there is a path from $q_0$ to $f_i$ we can use a simple
+   breadth-first search, requiring at most $\lvert {V} \rvert + \lvert {E}
+   \rvert$ steps. Doing this naively for each $f_i \in F$ (where $F$ is the set
+   of final states in $M_L$) results in at most $\lvert F \rvert (\lvert {V} \rvert + \lvert {E}
+   \rvert)$ steps.
 \end{itemize}
 \section*{Textbook 3.6}
 \begin{itemize}[label=]
@@ -342,18 +393,27 @@ parentheses \[D = \{\mathbf{u} \in \Sigma^* \mid \text{all prefixes contain at
      first swapped for one of the new added steps and hence must be in $L$ or
      $L'$.\\
 
-     To construct a PDA which accepts $L \cdot L'$ we ``append'' one PDA
-     to the other by adding rules $\{(q_i, a, \alpha ; \beta, q'_0) \mid (q_i,
-     a, \alpha, \beta, q_j) \in \Delta \land q_j \in F\}$ and letting $F'$ be
-     the final states. Additionally, if $q'_0$ is final, each $q_i$ should also
-     be made final. Again, this is analogous to the construction of finite
-     automata for concatenation of regular languages.\\
+     
+     To construct a PDA which accepts $L \cdot L'$ we ``append'' $M_{L'}$ to $M_L$. Let
+     $$M_{L \cdot L'} = \langle \Sigma \cup \Sigma', (\Gamma \uplus \Gamma')
+     \cup \{!\}, Q
+     \uplus Q', \{q_o\}, \Delta'', F' \rangle$$ where $\Delta'' = \Delta \cup
+     \Delta' \cup \{(q_i, \lambda, !; \lambda, q'_0) \mid q_i \in F\}$ and $!$
+     is a new symbol to signify bottom of the stack. We start with this $!$ on
+     the stack.\\
+     This new machine is like executing $M_L$ and the, if we reach a final state
+     with $!$ on the stack, popping $!$ and executing $M_L'$ on the remainder of
+     the input. It accepts $L \cdot L'$
 
      Finally, the Kleene star of a language $L^*$ is accepted by ``looping''
-     $M_L$. To do this we add a new initial and final state $q'_0$ and an ``empty'' rule
-     $(q'_0, \lambda, \lambda ; \lambda, q_0)$, allowing our new machine to
-     accept the empty word (zero loops). Then add rules $(q_i, a, \alpha; \beta,
-     q_0)$ for each rule $(q_i, a, \alpha; \beta, q_j)$ in $M_L$ where $q_j$ is final.
+     $M_L$. To do this we add a new initial and final state $q'_0$, a
+     bottom of stack symbol $!$, and an ``empty'' rule $(q'_0, \lambda, \lambda;
+     !, q_0)$, allowing our new machine to accept the empty word (zero loops)
+     and pushing our bottom stack symbol before starting $M_L$. Then we add
+     rules $\{(q_i, \lambda, !; \lambda, q'_0) \mid q_i \in F\}$ to go from any
+     final state to the start state. These rules pop $!$ allowing for acceptance
+     in $q'_0$ so we can remove them from $F$ leaving $q'_0$ as the only
+     accepting state.
      
 \end{itemize}
 \section*{Textbook 4.1}
@@ -441,7 +501,9 @@ $S_3$ -> B$S_4$
 $S_4$ -> A$S_5$
 $S_5$ -> BA
         \end{lstlisting}
-      \item Get rid of the null production \lstinline{A -> l}
+      \item Get rid of the null production \lstinline{A -> l}. We also have to
+        add rules \lstinline{B -> X} for any existing rule \lstinline{B -> AX}
+        or \lstinline{B -> XA}
       \end{enumerate}
       The resulting grammar $G' = \langle \Sigma, N \cup \{N_a, S_{1}, ... ,
       S_5\}, S, R' \rangle$ with $R' = $
@@ -455,6 +517,11 @@ $S_2$ -> A$S_3$
 $S_3$ -> B$S_4$
 $S_4$ -> A$S_5$
 $S_5$ -> BA
+A -> $N_a$
+S -> $S_1$
+$S_2$ -> $S_3$
+$S_4$ -> $S_5$
+$S_5$ -> B
 \end{lstlisting}
 
     \item \textbf{5)} convert the grammar to Greibach normal form\\
@@ -462,20 +529,20 @@ $S_5$ -> BA
       \begin{enumerate}
         \item Remove the left recursive rule \lstinline{A -> A$N_a$} by
           replacing it with \lstinline{A -> A', A' -> aA'}
-        \item Get rid of non-terminals on the let of productions by replacing
+        \item Get rid of non-terminals on the left of productions by replacing
           them with the terminals they generate.
         \end{enumerate}
      We obtain a new grammar with $N'' = \{N \cup \{A', S_1 ... S_6\}\}$ and
      $R'' =$
      \begin{lstlisting}
-$S$ -> aA'$S_1$
+$S$ -> aA'$S_1$ | b$S_2$
 $S_1$ -> b$S_2$
-$S_2$ -> aA'$S_3$
-$S_3$ -> b$S_4$
+$S_2$ -> aA'$S_3$ | b$S_4$
+$S_3$ -> b$S_4$ | b$S_6$
 $S_4$ -> aA'$S_5$
-$S_5$ -> b$S_6$
+$S_5$ -> b | b$S_6$
 $S_6$ -> a | aA'
-$A$ -> aA' | l
+$A$ -> a | aA' | l
 \end{lstlisting}
 
    \item \textbf{8)} Convert the following grammar to CNF:
@@ -486,36 +553,34 @@ B -> AAb | aabA
 \end{lstlisting}
      Following the same procedure as exercise \textbf{4)} we obtain:
      \begin{lstlisting}
-$S$ -> A$S_1$
-$S_1$ -> $N_b S_2$
-$S_2$ -> $N_a$B
-$A$ -> $N_b A_1$
-$A_1$ -> A$N_a$
-$B$ -> A$B_1$ | $N_a B_2$
-$B_1$ -> A$N_b$
-$B_2$ -> $N_a B_3$
-$B_3$ -> $N_b$A
 $N_a$ -> a
 $N_b$ -> b
+S -> A$S_1$ | $S_1$
+$S_1$ -> $N_b S_2$
+$S_2$ -> $N_a$B
+A -> $N_b A_1$
+$A_1$ -> A$N_a$ | $N_a$
+B -> $B_1$ | A$B_1$ | $N_a B_2$
+$B_1$ -> $N_b$
+$B_2$ -> $N_a N_b$
 \end{lstlisting}
 
    \item \textbf{9)} convert the preceding grammar to GNF
      This time there are no left-recursive rules to eliminate, so the only
      necessary step is replacing leading non-terminals with the terminals they
-     generate. We note $A \gen bA, \; A_1 \gen bN_a, \;B \gen bB_1 | aB_2,\; B_1 \gen
-     bAN_b, \;B_2 \gen aB_3,\; N_a \gen a, \; N_b \gen b$ and construct the production rules:
+     generate. We note $A \gen bA_1, \; A_1 \gen b A_1 a | a, \; B_1 \gen
+     bA_1N_b, \;B_2 \gen ab,\; N_a \gen a, \; N_b \gen b$ and construct the production rules:
      \begin{lstlisting}
-$S$ -> bA$S_1$
-$S_1$ -> b$S_2$
-$S_2$ -> aB
-$A$ -> b$A_1$
-$A_1$ -> b$A_1 N_a$
-$B$ -> b$A_1 B_1$ | a$B_2$
-$B_1$ -> b$A_1 N_b$
-$B_2$ -> a$B_3$
-$B_3$ -> bA
 $N_a$ -> a
 $N_b$ -> b
+S-> b$A_1 B_1$ | b $S_2$
+$S_1$ -> b$S_2$
+$S_2$ -> aB
+A -> b$A_1$
+$A_1$ -> B$A_1 N_a$ | a
+B -> b$A_1 B_1$ | a$B_2$ | b$A_1 N_b$ | b
+$B_1$ -> b$A_1 N_b$ | b
+$B_2$ -> a$N_b$
 \end{lstlisting}
    \end{itemize}
 \end{document}
