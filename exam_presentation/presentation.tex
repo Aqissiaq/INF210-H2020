@@ -548,11 +548,11 @@ Create a PSG which work like:
   \item change tape to $1^i01^i$
   \item move to first cell
   \item emulate $M$ on the tape
-  \item if $M$ accepts, loop infinitely. if $M$ rejects, reject
+  \item if $M$ accepts, loop infinitely. if $M$ rejects, accept
   \end{enumerate}
-\item enumerate $M' = T_k$ and run $M$ with $1^k01^k$ as input 
-\item if $M$ accepts, then $M'$ halts with $1^k$ as input, so $M$ must reject by 4.
-\item if $M$ rejects, then $M'$ loops forever, so $M$ must accept by 4.
+\item enumerate $M' = T_k$ and run $M'$ with $1^k$ as input 
+\item if $M$ accepts, then $M'$ loops forever on $1^k$, so $M$ must reject
+\item if $M$ rejects, then $M'$ halts on $1^k$, so $M$ must accept
 \end{itemize}
 \end{frame}
 
